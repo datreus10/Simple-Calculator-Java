@@ -6,16 +6,13 @@
 package com.mycompany.mavenproject1;
 
 import java.awt.EventQueue;
-
-import javax.swing.JFrame;
-import javax.swing.JTextField;
-import javax.swing.JButton;
 import java.awt.Font;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.awt.event.ActionEvent;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 public class Calculator {
@@ -23,7 +20,7 @@ public class Calculator {
 	private JFrame frame;
 	private JTextField textField;
 
-	//private boolean isSecondNum = false;
+	private boolean isSecondNum = false;
 	double firstnum;
 	double secondnum;
 	double result;
@@ -45,23 +42,60 @@ public class Calculator {
 				firstnum = Double.parseDouble(textField.getText());
 				textField.setText(event.getActionCommand());
 				operations = event.getActionCommand();
+				isSecondNum = true;
 			} else if (event.getActionCommand().equals("AC")) {
 				textField.setText("0");
 				setDefaultValue();
 			} else if (event.getActionCommand().equals("Del")) {
-				// implement code
+				String Back = null;
+				if (textField.getText().length() > 0) {
+					StringBuilder strB = new StringBuilder(textField.getText());
+					strB.deleteCharAt(textField.getText().length() - 1);
+					Back = strB.toString();
+					textField.setText(Back);
+				}
 			} else if (event.getActionCommand().equals("=")) {
-				// implement code
+				isSecondNum = false;
+				String answer;
+
+				secondnum = Double.parseDouble(textField.getText());
+
+				if (operations == "+") {
+					result = firstnum + secondnum;
+					answer = String.format("%.2f", result);
+					textField.setText(answer);
+				} else if (operations == "-") {
+					result = firstnum - secondnum;
+					answer = String.format("%.2f", result);
+					textField.setText(answer);
+				} else if (operations == "/") {
+					result = firstnum / secondnum;
+					answer = String.format("%.2f", result);
+					textField.setText(answer);
+				} else if (operations == "*") {
+					result = firstnum * secondnum;
+					answer = String.format("%.2f", result);
+					textField.setText(answer);
+				} else if (operations == "%") {
+					result = firstnum % secondnum;
+					answer = String.format("%.2f", result);
+					textField.setText(answer);
+				}
+
 			} else { // cac nut con lai
 				if (textField.getText().equals("0"))
 					textField.setText("");
-				if (!operations.equals(""))
+				if (isSecondNum) {
 					textField.setText("");
+					isSecondNum = false;
+				}
+
 				String EnterNumber = textField.getText() + button.getText();
 				textField.setText(EnterNumber);
 			}
 
 		});
+
 	}
 
 	/**
@@ -122,17 +156,8 @@ public class Calculator {
 		frame.getContentPane().add(btnDev);
 
 		JButton btnBack = new JButton("Del");
-		btnBack.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				String Back = null;
-				if (textField.getText().length() > 0) {
-					StringBuilder strB = new StringBuilder(textField.getText());
-					strB.deleteCharAt(textField.getText().length() - 1);
-					Back = strB.toString();
-					textField.setText(Back);
-				}
-			}
-		});
+		addEventToButton(btnBack);
+
 		btnBack.setFont(new Font("Tahoma", Font.BOLD, 18));
 		btnBack.setBounds(12, 405, 64, 64);
 		frame.getContentPane().add(btnBack);
@@ -252,38 +277,8 @@ public class Calculator {
 		frame.getContentPane().add(btnDot);
 
 		JButton btnEqual = new JButton("=");
-		btnEqual.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+		addEventToButton(btnEqual);
 
-				String answer;
-
-				// Loi khi parse
-				secondnum = Double.parseDouble(textField.getText());
-				//
-
-				if (operations == "+") {
-					result = firstnum + secondnum;
-					answer = String.format("%.2f", result);
-					textField.setText(answer);
-				} else if (operations == "-") {
-					result = firstnum - secondnum;
-					answer = String.format("%.2f", result);
-					textField.setText(answer);
-				} else if (operations == "/") {
-					result = firstnum / secondnum;
-					answer = String.format("%.2f", result);
-					textField.setText(answer);
-				} else if (operations == "*") {
-					result = firstnum * secondnum;
-					answer = String.format("%.2f", result);
-					textField.setText(answer);
-				} else if (operations == "%") {
-					result = firstnum % secondnum;
-					answer = String.format("%.2f", result);
-					textField.setText(answer);
-				}
-			}
-		});
 		btnEqual.setFont(new Font("Tahoma", Font.BOLD, 22));
 		btnEqual.setBounds(276, 325, 64, 144);
 		frame.getContentPane().add(btnEqual);
