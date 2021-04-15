@@ -21,79 +21,71 @@ public class Calculator {
 	private JTextField textField;
 
 	private boolean isSecondNum = false;
-	double firstnum;
-	double secondnum;
-	double result;
-	String operations;
-	String answer;
+	private boolean isFirstNum = true;
+	private boolean isOperator = false;
+	String firstnum = "";
+	String secondnum = "";
+	String operations = "";
 
 	private void setDefaultValue() {
-		firstnum = 0;
-		secondnum = 0;
-		result = 0;
-		operations = "";
-		answer = "0";
+
 	}
 
 	private void addEventToButton(JButton button) {
 		button.addActionListener(event -> {
 			ArrayList<String> operators = new ArrayList<>(Arrays.asList("+", "-", "*", "/"));
 			if (operators.contains(event.getActionCommand())) { // neu event bang + - * /
-				firstnum = Double.parseDouble(textField.getText());
+				isOperator = true;
 				textField.setText(event.getActionCommand());
 				operations = event.getActionCommand();
-				isSecondNum = true;
 			} else if (event.getActionCommand().equals("AC")) {
-				textField.setText("0");
-				setDefaultValue();
+				firstnum = "0";
+				secondnum = "";
+				operations = "";
+				// textField.setText("0");
+				// return;
 			} else if (event.getActionCommand().equals("Del")) {
-				String Back = null;
-				if (textField.getText().length() > 0) {
-					StringBuilder strB = new StringBuilder(textField.getText());
-					strB.deleteCharAt(textField.getText().length() - 1);
-					Back = strB.toString();
-					textField.setText(Back);
+				if (!secondnum.equals(""))
+					secondnum = secondnum.substring(0, secondnum.length() - 1);
+				else if (!operations.equals("")) {
+					operations = "";
+					isOperator = false;
+				} else if (!firstnum.equals(""))
+					firstnum = firstnum.substring(0, firstnum.length() - 1);
+				else {
+					textField.setText("0");
+					return;
 				}
+
 			} else if (event.getActionCommand().equals("=")) {
-				isSecondNum = false;
-				String answer;
-
-				secondnum = Double.parseDouble(textField.getText());
-
-				if (operations == "+") {
-					result = firstnum + secondnum;
-					answer = String.format("%.2f", result);
-					textField.setText(answer);
-				} else if (operations == "-") {
-					result = firstnum - secondnum;
-					answer = String.format("%.2f", result);
-					textField.setText(answer);
-				} else if (operations == "/") {
-					result = firstnum / secondnum;
-					answer = String.format("%.2f", result);
-					textField.setText(answer);
-				} else if (operations == "*") {
-					result = firstnum * secondnum;
-					answer = String.format("%.2f", result);
-					textField.setText(answer);
-				} else if (operations == "%") {
-					result = firstnum % secondnum;
-					answer = String.format("%.2f", result);
-					textField.setText(answer);
+				isOperator = false;
+				double numF = firstnum.equals("") ? 0 : Double.parseDouble(firstnum);
+				double numS = Double.parseDouble(secondnum);
+				switch (operations) {
+				case "+":
+					textField.setText(String.format("%.2f", numF + numS));
+					break;
+				case "-":
+					textField.setText(String.format("%.2f", numF - numS));
+					break;
+				case "*":
+					textField.setText(String.format("%.2f", numF * numS));
+					break;
+				case "/":
+					textField.setText(String.format("%.2f", numF / numS));
+					break;
 				}
-
-			} else { // cac nut con lai
-				if (textField.getText().equals("0"))
-					textField.setText("");
-				if (isSecondNum) {
-					textField.setText("");
-					isSecondNum = false;
-				}
-
-				String EnterNumber = textField.getText() + button.getText();
-				textField.setText(EnterNumber);
+				firstnum = textField.getText();
+				secondnum = "";
+				operations = "";
+				return;
+			} else { // cac nut con lai --> number .
+				if (isOperator)
+					secondnum += event.getActionCommand();
+				else
+					firstnum += event.getActionCommand();
 			}
-
+			textField.setText(firstnum + operations + secondnum);
 		});
 
 	}
