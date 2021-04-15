@@ -1,14 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.mycompany.mavenproject1;
+
+import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 
 import java.awt.EventQueue;
 import java.awt.Font;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -20,46 +15,78 @@ public class Calculator {
 	private JFrame frame;
 	private JTextField textField;
 
-	private boolean isSecondNum = false;
-	private boolean isFirstNum = true;
 	private boolean isOperator = false;
-	String firstnum = "";
+	String firstnum = "0";
 	String secondnum = "";
 	String operations = "";
 
-	private void setDefaultValue() {
+	// private void setValueToDefault() {
+	// firstnum = "0";
+	// secondnum = "0";
+	// operations = "";
+	// isOperator = false;
+	// }
+
+	private void addEventToNumButton(JButton button) {
+		button.addActionListener(event -> {
+			if (!textField.getText().equals("Syntax Error")) {
+				String temp = event.getActionCommand();
+				if (isOperator)
+					secondnum += temp;
+				else
+					firstnum = firstnum.equals("0") && !temp.equals(".") ? temp : firstnum + temp;
+				textField.setText(firstnum + operations + secondnum);
+			}
+		});
 
 	}
 
-	private void addEventToButton(JButton button) {
+	private void addEventToOperatorButton(JButton button) {
 		button.addActionListener(event -> {
-			ArrayList<String> operators = new ArrayList<>(Arrays.asList("+", "-", "*", "/"));
-			if (operators.contains(event.getActionCommand())) { // neu event bang + - * /
+			if (!textField.getText().equals("Syntax Error")) {
 				isOperator = true;
-				textField.setText(event.getActionCommand());
 				operations = event.getActionCommand();
-			} else if (event.getActionCommand().equals("AC")) {
-				firstnum = "0";
-				secondnum = "";
-				operations = "";
-				// textField.setText("0");
-				// return;
-			} else if (event.getActionCommand().equals("Del")) {
+				textField.setText(firstnum + operations + secondnum);
+			}
+		});
+	}
+
+	private void addEventToButtonAC(JButton button) {
+		button.addActionListener(event -> {
+			firstnum = "0";
+			secondnum = "";
+			operations = "";
+			isOperator = false;
+			textField.setText(firstnum + operations + secondnum);
+		});
+	}
+
+	private void addEventToButtonDel(JButton button) {
+		button.addActionListener(event -> {
+			if (!textField.getText().equals("Syntax Error")) {
 				if (!secondnum.equals(""))
 					secondnum = secondnum.substring(0, secondnum.length() - 1);
 				else if (!operations.equals("")) {
 					operations = "";
 					isOperator = false;
-				} else if (!firstnum.equals(""))
+				} else if (!firstnum.equals("")) {
 					firstnum = firstnum.substring(0, firstnum.length() - 1);
-				else {
-					textField.setText("0");
+					if (firstnum.equals(""))
+						firstnum = "0";
+				}
+				textField.setText(firstnum + operations + secondnum);
+			}
+		});
+	}
+
+	private void addEventToButtonEqual(JButton button) {
+		button.addActionListener(event -> {
+			try {
+				double numF = Double.parseDouble(firstnum);
+				if (secondnum.equals("")) {
+					textField.setText(firstnum);
 					return;
 				}
-
-			} else if (event.getActionCommand().equals("=")) {
-				isOperator = false;
-				double numF = firstnum.equals("") ? 0 : Double.parseDouble(firstnum);
 				double numS = Double.parseDouble(secondnum);
 				switch (operations) {
 				case "+":
@@ -72,37 +99,32 @@ public class Calculator {
 					textField.setText(String.format("%.2f", numF * numS));
 					break;
 				case "/":
-					textField.setText(String.format("%.2f", numF / numS));
+					if (numS == 0)
+						textField.setText("Syntax Error");
+					else
+						textField.setText(String.format("%.2f", numF / numS));
 					break;
 				}
-				firstnum = textField.getText();
-				secondnum = "";
-				operations = "";
-				return;
-			} else { // cac nut con lai --> number .
-				if (isOperator)
-					secondnum += event.getActionCommand();
-				else
-					firstnum += event.getActionCommand();
+			} catch (Exception e) {
+				textField.setText("Syntax Error");
 			}
-			textField.setText(firstnum + operations + secondnum);
+			isOperator = false;
+			firstnum = textField.getText();
+			secondnum = "";
+			operations = "";
 		});
-
 	}
 
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					Calculator window = new Calculator();
-					window.setDefaultValue();
-					window.frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+		EventQueue.invokeLater(() -> {
+			try {
+				Calculator window = new Calculator();
+				window.frame.setVisible(true);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		});
 	}
@@ -120,7 +142,7 @@ public class Calculator {
 	private void initialize() {
 		frame = new JFrame();
 		frame.setBounds(100, 100, 371, 536);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 
 		textField = new JTextField();
@@ -134,50 +156,42 @@ public class Calculator {
 		// 0------------------------------------------------------//
 
 		JButton btnCancel = new JButton("AC");
-		addEventToButton(btnCancel);
+		addEventToButtonAC(btnCancel);
 
 		btnCancel.setFont(new Font("Tahoma", Font.BOLD, 22));
 		btnCancel.setBounds(12, 85, 64, 64);
 		frame.getContentPane().add(btnCancel);
 
 		JButton btnDev = new JButton("/");
-		addEventToButton(btnDev);
+		addEventToOperatorButton(btnDev);
 
 		btnDev.setFont(new Font("Tahoma", Font.BOLD, 22));
 		btnDev.setBounds(100, 85, 64, 64);
 		frame.getContentPane().add(btnDev);
 
 		JButton btnBack = new JButton("Del");
-		addEventToButton(btnBack);
+		addEventToButtonDel(btnBack);
 
 		btnBack.setFont(new Font("Tahoma", Font.BOLD, 18));
 		btnBack.setBounds(12, 405, 64, 64);
 		frame.getContentPane().add(btnBack);
 
 		JButton btnMul = new JButton("*");
-		addEventToButton(btnMul);
+		addEventToOperatorButton(btnMul);
 
 		btnMul.setFont(new Font("Tahoma", Font.BOLD, 22));
 		btnMul.setBounds(188, 85, 64, 64); // 276, 325, 64, 64
 		frame.getContentPane().add(btnMul);
 
-		/*
-		 * JButton btnPerc = new JButton("%"); btnPerc.addActionListener(new
-		 * ActionListener() { public void actionPerformed(ActionEvent e) { firstnum =
-		 * Double.parseDouble(textField.getText()); textField.setText(""); operations =
-		 * "%"; } }); btnPerc.setFont(new Font("Tahoma", Font.BOLD, 22));
-		 * btnPerc.setBounds(188, 85, 64, 64); frame.getContentPane().add(btnPerc);
-		 */
-
 		JButton btnPlus = new JButton("+");
-		addEventToButton(btnPlus);
+		addEventToOperatorButton(btnPlus);
 
 		btnPlus.setFont(new Font("Tahoma", Font.BOLD, 22));
 		btnPlus.setBounds(276, 165, 64, 144);
 		frame.getContentPane().add(btnPlus);
 
 		JButton btnSub = new JButton("-");
-		addEventToButton(btnSub);
+		addEventToOperatorButton(btnSub);
 
 		btnSub.setFont(new Font("Tahoma", Font.BOLD, 22));
 		btnSub.setBounds(276, 85, 64, 64);
@@ -186,21 +200,21 @@ public class Calculator {
 		// -------------------Row
 		// 1------------------------------------------------------//
 		JButton btn7 = new JButton("7");
-		addEventToButton(btn7);
+		addEventToNumButton(btn7);
 
 		btn7.setFont(new Font("Tahoma", Font.BOLD, 22));
 		btn7.setBounds(12, 165, 64, 64);
 		frame.getContentPane().add(btn7);
 
 		JButton btn8 = new JButton("8");
-		addEventToButton(btn8);
+		addEventToNumButton(btn8);
 
 		btn8.setFont(new Font("Tahoma", Font.BOLD, 22));
 		btn8.setBounds(100, 165, 64, 64);
 		frame.getContentPane().add(btn8);
 
 		JButton btn9 = new JButton("9");
-		addEventToButton(btn9);
+		addEventToNumButton(btn9);
 
 		btn9.setFont(new Font("Tahoma", Font.BOLD, 22));
 		btn9.setBounds(188, 165, 64, 64);
@@ -209,21 +223,21 @@ public class Calculator {
 		// -------------------Row
 		// 2------------------------------------------------------//
 		JButton btn4 = new JButton("4");
-		addEventToButton(btn4);
+		addEventToNumButton(btn4);
 
 		btn4.setFont(new Font("Tahoma", Font.BOLD, 22));
 		btn4.setBounds(12, 245, 64, 64);
 		frame.getContentPane().add(btn4);
 
 		JButton btn5 = new JButton("5");
-		addEventToButton(btn5);
+		addEventToNumButton(btn5);
 
 		btn5.setFont(new Font("Tahoma", Font.BOLD, 22));
 		btn5.setBounds(100, 245, 64, 64);
 		frame.getContentPane().add(btn5);
 
 		JButton btn6 = new JButton("6");
-		addEventToButton(btn6);
+		addEventToNumButton(btn6);
 
 		btn6.setFont(new Font("Tahoma", Font.BOLD, 22));
 		btn6.setBounds(188, 245, 64, 64);
@@ -232,21 +246,21 @@ public class Calculator {
 		// -------------------Row
 		// 3------------------------------------------------------//
 		JButton btn1 = new JButton("1");
-		addEventToButton(btn1);
+		addEventToNumButton(btn1);
 
 		btn1.setFont(new Font("Tahoma", Font.BOLD, 22));
 		btn1.setBounds(12, 325, 64, 64);
 		frame.getContentPane().add(btn1);
 
 		JButton btn2 = new JButton("2");
-		addEventToButton(btn2);
+		addEventToNumButton(btn2);
 
 		btn2.setFont(new Font("Tahoma", Font.BOLD, 22));
 		btn2.setBounds(100, 325, 64, 64);
 		frame.getContentPane().add(btn2);
 
 		JButton btn3 = new JButton("3");
-		addEventToButton(btn3);
+		addEventToNumButton(btn3);
 
 		btn3.setFont(new Font("Tahoma", Font.BOLD, 22));
 		btn3.setBounds(188, 325, 64, 64);
@@ -255,21 +269,21 @@ public class Calculator {
 		// -------------------Row
 		// 4------------------------------------------------------//
 		JButton btn0 = new JButton("0");
-		addEventToButton(btn0);
+		addEventToNumButton(btn0);
 
 		btn0.setFont(new Font("Tahoma", Font.BOLD, 22));
 		btn0.setBounds(100, 405, 64, 64);
 		frame.getContentPane().add(btn0);
 
 		JButton btnDot = new JButton(".");
-		addEventToButton(btnDot);
+		addEventToNumButton(btnDot);
 
 		btnDot.setFont(new Font("Tahoma", Font.BOLD, 26));
 		btnDot.setBounds(188, 405, 64, 64);
 		frame.getContentPane().add(btnDot);
 
 		JButton btnEqual = new JButton("=");
-		addEventToButton(btnEqual);
+		addEventToButtonEqual(btnEqual);
 
 		btnEqual.setFont(new Font("Tahoma", Font.BOLD, 22));
 		btnEqual.setBounds(276, 325, 64, 144);
